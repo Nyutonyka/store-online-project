@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +48,11 @@ public class ProductAdminServiceImpl implements ProductAdminService {
                 .setCategory(product.getCategory())
                 .setDescription(product.getDescription())
                 .setQuantity(product.getQuantity())
-                .setProductStatus(product.getProductStatus());
+                .setProductStatus(product.getProductStatus())
+                .setImagePath(product.getImagePath());
     }
 
+    @Override
     public ProductAdminDto saveImage(Long productId, MultipartFile imageFile) throws IOException {
         Product product = productAdminRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
@@ -74,5 +78,29 @@ public class ProductAdminServiceImpl implements ProductAdminService {
         } catch (IOException e) {
             throw new IOException("Failed to save image", e);
         }
+    }
+
+    public List<ProductAdminDto> getAllProducts() {
+        List<Product> products = productAdminRepository.findAll();
+        List<ProductAdminDto> productAdminDtoList = new ArrayList<>();
+        for (Product product:products){
+            ProductAdminDto productAdminDto = mapProductToProductAdminDto(product);
+            productAdminDtoList.add(productAdminDto);
+        }
+        return productAdminDtoList;
+    }
+
+    @Override
+    public List<ProductAdminDto> getActiveAndTemporarilyAbsentProducts() {
+        List<ProductAdminDto> products = getAllProducts();
+        List<ProductAdminDto> filteredProducts = new ArrayList<>();
+
+        for (ProductAdminDto product : products) {
+            String status = String.valueOf(product.getProductStatus());
+            if (status.equals("ACTIVE") || status.equals("TEMPORARILY_ABSENT")) {
+                filteredProducts.add(product);
+            }
+        }
+        return filteredProducts;
     }
 }
