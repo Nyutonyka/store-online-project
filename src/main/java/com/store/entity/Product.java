@@ -1,7 +1,7 @@
 package com.store.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.springframework.web.multipart.MultipartFile;
 
